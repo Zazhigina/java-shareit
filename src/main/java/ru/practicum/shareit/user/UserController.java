@@ -8,9 +8,6 @@ import ru.practicum.shareit.user.dto.UserDto;
 import javax.validation.Valid;
 import java.util.List;
 
-/**
- * TODO Sprint add-controllers.
- */
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(path = "/users")
@@ -26,7 +23,7 @@ public class UserController {
 
     @PatchMapping("/{userId}")
     public UserDto update(@RequestBody UserDto userDto, @PathVariable Long userId) {
-        log.info("PATCH запрос на обновление пользователя c id: {}", userId );
+        log.info("PATCH запрос на обновление пользователя c id: {}", userId);
         return userService.update(userId, userDto);
     }
 
@@ -38,7 +35,7 @@ public class UserController {
 
     @GetMapping("/{userId}")
     public UserDto get(@PathVariable Long userId) {
-        log.info("GET запрос на получение пользователя c id: {}", userId );
+        log.info("GET запрос на получение пользователя c id: {}", userId);
         return userService.getUserById(userId);
     }
 
