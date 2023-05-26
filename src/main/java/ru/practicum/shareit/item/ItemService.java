@@ -3,7 +3,7 @@ package ru.practicum.shareit.item;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.ObjectNotFoundException;
-import org.springframework.stereotype.Service;;
+import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exceptions.NotFoundException;
 import ru.practicum.shareit.item.dao.ItemDao;
 import ru.practicum.shareit.item.dto.ItemDto;
@@ -30,27 +30,31 @@ public class ItemService {
 
     public ItemDto update(Long userId, Long itemId, ItemDto itemDto) {
         UserDto user = userService.getUserById(userId);
-        Item itemFromStorage = ItemMapper.toItem(getItemById(userId, itemId));
-        if (!itemFromStorage.getOwner().getId().equals(userId)) {
-            log.debug("Пользователь с id {} не является владельцем вещи под id {}", userId, itemId);
-            throw new NotFoundException(String.format("Пользователь с id %s " +
-                    "не является владельцем вещи id %s.", userId, itemId));
-        }
-        Item item = ItemMapper.toItem(itemDto);
-        if (Objects.isNull(item.getAvailable())) {
-            item.setAvailable(itemFromStorage.getAvailable());
-        }
-        if (Objects.isNull(item.getDescription())) {
-            item.setDescription(itemFromStorage.getDescription());
-        }
-        if (Objects.isNull(item.getName())) {
-            item.setName(itemFromStorage.getName());
-        }
-        item.setId(itemFromStorage.getId());
-        item.setRequest(itemFromStorage.getRequest());
-        item.setOwner(itemFromStorage.getOwner());
+        Optional<Item> itemOptional = itemDao.getItemById(itemId);
+        if (itemOptional.isPresent()) {
+            if (!itemOptional.get().getOwner().getId().equals(userId)) {
+                log.debug("Пользователь с id {} не является владельцем вещи под id {}", userId, itemId);
+                throw new NotFoundException(String.format("Пользователь с id %s " +
+                        "не является владельцем вещи id %s.", userId, itemId));
+            }
+            Item itemFromStorage = itemOptional.get();
+            Item item = ItemMapper.toItem(itemDto);
+            if (Objects.isNull(item.getAvailable())) {
+                item.setAvailable(itemFromStorage.getAvailable());
+            }
+            if (Objects.isNull(item.getDescription())) {
+                item.setDescription(itemFromStorage.getDescription());
+            }
+            if (Objects.isNull(item.getName())) {
+                item.setName(itemFromStorage.getName());
+            }
+            item.setId(itemFromStorage.getId());
+            item.setRequest(itemFromStorage.getRequest());
+            item.setOwner(itemFromStorage.getOwner());
 
-        return ItemMapper.toItemDto(itemDao.update(item));
+            return ItemMapper.toItemDto(itemDao.update(item));
+        }
+        return null;
     }
 
     public ItemDto getItemById(Long userId, Long itemId) throws ObjectNotFoundException {
