@@ -3,6 +3,9 @@ package ru.practicum.shareit.user.dao;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
+
+import java.util.concurrent.atomic.AtomicLong;
+
 import ru.practicum.shareit.user.User;
 
 import java.util.ArrayList;
@@ -16,16 +19,11 @@ import java.util.Map;
 public class UserDaoImpl implements UserDao {
 
     private final Map<Long, User> users = new HashMap<>();
-    private Long userId = 1L;
-
-
-    public Long generatedId() {
-        return userId++;
-    }
+    private final AtomicLong userId = new AtomicLong();
 
     @Override
     public User add(User user) {
-        user.setId(generatedId());
+        user.setId(userId.incrementAndGet());
         users.put(user.getId(), user);
         log.info("Добавлен новый пользователь");
         return user;
@@ -34,7 +32,7 @@ public class UserDaoImpl implements UserDao {
     @Override
     public User update(Long userId, User user) {
         users.put(userId, user);
-        log.info("Пользователь {} обновлен" ,  user.getName());
+        log.info("Пользователь {} обновлен", user.getName());
         return user;
     }
 
@@ -53,7 +51,7 @@ public class UserDaoImpl implements UserDao {
         return users.get(userId);
     }
 
-    private boolean userNotExists(Long user){
+    private boolean userNotExists(Long user) {
         return users.containsKey(user);
     }
 }

@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import ru.practicum.shareit.exceptions.NotFoundException;
-import ru.practicum.shareit.exceptions.ObjectNotFoundException;
 import ru.practicum.shareit.user.dao.UserDao;
 import ru.practicum.shareit.user.dto.UserDto;
 
@@ -19,7 +18,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class UserService {
     private final UserDao userDao;
-    private final UserMapper userMapper;
 
     public UserDto add(UserDto userDto) {
         User user = UserMapper.toUser(userDto);
@@ -66,7 +64,7 @@ public class UserService {
     public UserDto getUserById(Long userId) {
         if (!userNotExists(userId)) {
             log.debug("Пользователь с  id {} не найден.", userId);
-            throw new ObjectNotFoundException(String.format("Пользователь с id: %s не найден!", userId));
+            throw new NotFoundException(String.format("Пользователь с id: %s не найден!", userId));
         }
         User user = userDao.getUserById(userId);
         validation(user);

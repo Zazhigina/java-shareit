@@ -4,15 +4,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.model.ItemService;
-
 
 import javax.validation.Valid;
 import java.util.List;
 
-/**
- * TODO Sprint add-controllers.
- */
 @RestController
 @RequestMapping("/items")
 @RequiredArgsConstructor
@@ -41,7 +36,7 @@ public class ItemController {
                        @PathVariable("itemId")
                        Long itemId) {
         log.info("GET запрос на получение вещи c id: {}", itemId);
-        return ItemMapper.toItemDto(itemService.getItemById(userId, itemId));
+        return itemService.getItemById(userId, itemId);
     }
 
     @GetMapping

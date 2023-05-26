@@ -31,20 +31,4 @@ public class ErrorHandler {
                 e.getMessage()
         );
     }
-
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse handleValidationException(final DiscrepancyException e) {
-        return new ErrorResponse(
-                e.getMessage()
-        );
-    }
-
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse handleValidationException(final ObjectNotFoundException e) {
-        return new ErrorResponse(
-                e.getMessage()
-        );
-    }
 }

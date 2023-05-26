@@ -1,13 +1,13 @@
-package ru.practicum.shareit.item.model;
+package ru.practicum.shareit.item;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.ObjectNotFoundException;
-import org.springframework.stereotype.Service;
-import ru.practicum.shareit.exceptions.DiscrepancyException;
-import ru.practicum.shareit.item.ItemMapper;
+import org.springframework.stereotype.Service;;
+import ru.practicum.shareit.exceptions.NotFoundException;
 import ru.practicum.shareit.item.dao.ItemDao;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.UserMapper;
 import ru.practicum.shareit.user.UserService;
 import ru.practicum.shareit.user.dto.UserDto;
@@ -30,10 +30,10 @@ public class ItemService {
 
     public ItemDto update(Long userId, Long itemId, ItemDto itemDto) {
         UserDto user = userService.getUserById(userId);
-        Item itemFromStorage = getItemById(userId, itemId);
+        Item itemFromStorage = ItemMapper.toItem(getItemById(userId, itemId));
         if (!itemFromStorage.getOwner().getId().equals(userId)) {
             log.debug("Пользователь с id {} не является владельцем вещи под id {}", userId, itemId);
-            throw new DiscrepancyException(String.format("Пользователь с id %s " +
+            throw new NotFoundException(String.format("Пользователь с id %s " +
                     "не является владельцем вещи id %s.", userId, itemId));
         }
         Item item = ItemMapper.toItem(itemDto);
@@ -53,15 +53,15 @@ public class ItemService {
         return ItemMapper.toItemDto(itemDao.update(item));
     }
 
-    public Item getItemById(Long userId, Long itemId) throws ObjectNotFoundException {
+    public ItemDto getItemById(Long userId, Long itemId) throws ObjectNotFoundException {
         userService.getUserById(userId);
         Optional<Item> itemGet = itemDao.getItemById(itemId);
         if (itemGet.isEmpty()) {
             log.debug("У пользователя с id {} не существует вещи с id {}", userId, itemId);
-            throw new ru.practicum.shareit.exceptions.ObjectNotFoundException(String.format("У пользователя с id %s не " +
+            throw new ru.practicum.shareit.exceptions.NotFoundException(String.format("У пользователя с id %s не " +
                     "существует вещи с id %s", userId, itemId));
         }
-        return itemGet.get();
+        return ItemMapper.toItemDto(itemGet.get());
     }
 
     public List<ItemDto> getAll(Long userId) {

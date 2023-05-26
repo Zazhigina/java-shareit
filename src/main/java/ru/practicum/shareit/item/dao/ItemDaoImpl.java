@@ -6,6 +6,7 @@ import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.item.model.Item;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicLong;
 
 @Slf4j
 @Repository
@@ -14,16 +15,11 @@ public class ItemDaoImpl implements ItemDao {
 
     private final Map<Long, List<Item>> items = new HashMap<>();
 
-    Long itemId = 1L;
-
-    public Long generatedId() {
-        return itemId++;
-    }
-
+    private final AtomicLong itemId = new AtomicLong();
 
     @Override
     public Item create(Item item) {
-        item.setId(generatedId());
+        item.setId(itemId.incrementAndGet());
         List<Item> list = new ArrayList<>();
         list.add(item);
         items.put(item.getOwner().getId(), list);
