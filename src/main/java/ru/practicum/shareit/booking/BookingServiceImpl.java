@@ -1,7 +1,6 @@
 package ru.practicum.shareit.booking;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.hibernate.ObjectNotFoundException;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.dto.BookingDto;
@@ -18,7 +17,6 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-@Slf4j
 public class BookingServiceImpl implements BookingService {
     private final BookingRepository bookingRepository;
     private final UserService userService;
@@ -29,7 +27,7 @@ public class BookingServiceImpl implements BookingService {
         User user = UserMapper.toUser(userService.getUserById(userId));
         Optional<Item> itemById = itemRepository.findById(bookingDto.getItemId());
         if (itemById.isEmpty()) {
-            log.debug("Вещь с id {} не найдена.", bookingDto.getItemId());
+            //log.debug("Вещь с id {} не найдена.", bookingDto.getItemId());
             throw new NotFoundException(String.format("Вещь с id %s не найдена.", bookingDto.getItemId()));
         }
         Booking booking = BookingMapper.toBooking(user, itemById.get(), bookingDto);
