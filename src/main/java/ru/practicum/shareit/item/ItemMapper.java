@@ -25,6 +25,7 @@ public class ItemMapper {
                 .available(itemDto.getAvailable())
                 .build();
     }
+
     public static List<ItemDto> mapToItemDto(Iterable<Item> items) {
         List<ItemDto> dtos = new ArrayList<>();
         for (Item item : items) {

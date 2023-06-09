@@ -29,8 +29,8 @@ public class BookingController {
     @PatchMapping("/{bookingId}")
     public BookingDtoOut updateStatus(@RequestHeader("X-Sharer-User-Id") Long userId,
                                       @PathVariable("bookingId")
-                                   Long bookingId,
-                                      @RequestParam(name = "approved") Boolean approved)  {
+                                      Long bookingId,
+                                      @RequestParam(name = "approved") Boolean approved) {
         log.info("PATCH запрос на обновление статуса бронирования вещи : {} от владельца с id: {}", bookingId, userId);
         return bookingService.update(userId, bookingId, approved);
     }
@@ -38,7 +38,7 @@ public class BookingController {
     @GetMapping("/{bookingId}")
     public BookingDtoOut getBookingById(@RequestHeader("X-Sharer-User-Id") Long userId,
                                         @PathVariable("bookingId")
-                                     Long bookingId) {
+                                        Long bookingId) {
         log.info("GET запрос на получение данных о конкретном бронировании {} от пользователся с id: {}", bookingId, userId);
         return bookingService.getBookingById(userId, bookingId);
     }
@@ -50,18 +50,18 @@ public class BookingController {
         if (Objects.isNull(state)) {
             throw new IllegalArgumentException(String.format("Unknown state: %s", bookingState));
         }
-        log.info("GET запрос на получениесписка всех бронирований текущего пользователя с id: {} и статусом {}", userId, state);
+        log.info("GET запрос на получение списка всех бронирований текущего пользователя с id: {} и статусом {}", userId, state);
         return bookingService.getAll(userId, bookingState);
     }
 
     @GetMapping("/owner")
-    public List <BookingDtoOut> getAllOwner(@RequestHeader("X-Sharer-User-Id") Long ownerId,
-                                     @RequestParam(value = "state", defaultValue = "ALL") String bookingState) {
+    public List<BookingDtoOut> getAllOwner(@RequestHeader("X-Sharer-User-Id") Long ownerId,
+                                           @RequestParam(value = "state", defaultValue = "ALL") String bookingState) {
         BookingState state = BookingState.from(bookingState);
         if (Objects.isNull(state)) {
             throw new IllegalArgumentException(String.format("Unknown state: %s", bookingState));
         }
-        log.info("GET запрос на получениесписка всех бронирований текущего владельца с id: {} и статусом {}", ownerId, state);
+        log.info("GET запрос на получение списка всех бронирований текущего владельца с id: {} и статусом {}", ownerId, state);
         return bookingService.getAllOwner(ownerId, bookingState);
     }
 }

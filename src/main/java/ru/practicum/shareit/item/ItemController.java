@@ -53,6 +53,7 @@ public class ItemController {
         log.info("GET запрос на поиск всех вещей c текстом: {}", text);
         return itemService.search(userId, text);
     }
+
     @PostMapping("/{itemId}/comment")
     public CommentDto createComment(@RequestHeader("X-Sharer-User-Id") Long userId,
                                     @Validated @RequestBody CommentDto commentDto,
