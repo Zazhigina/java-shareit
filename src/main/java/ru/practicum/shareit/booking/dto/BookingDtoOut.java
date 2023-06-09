@@ -30,7 +30,6 @@ public class BookingDtoOut {
     @DateTimeFormat(pattern = "yyyy-MM-ddTHH:mm:ss")
     private LocalDateTime end;
     private User booker;
-    @NotNull
     private BookingStatus status;
 }
 
