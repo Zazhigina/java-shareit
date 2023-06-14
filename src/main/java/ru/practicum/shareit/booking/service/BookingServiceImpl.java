@@ -21,6 +21,7 @@ import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -38,7 +39,7 @@ public class BookingServiceImpl implements BookingService {
         User user = UserMapper.toUser(userService.getUserById(userId));
         Optional<Item> itemById = itemRepository.findById(bookingDto.getItemId());
         if (itemById.isEmpty()) {
-            log.debug("Вещь с id {} не найдена.", bookingDto.getItemId());
+            log.error("Вещь с id {} не найдена.", bookingDto.getItemId());
             throw new NotFoundException(String.format("Вещь с id %s не найдена.", bookingDto.getItemId()));
         }
         Item item = itemById.get();
@@ -50,22 +51,8 @@ public class BookingServiceImpl implements BookingService {
     @Override
     @Transactional
     public BookingDtoOut update(Long userId, Long bookingId, Boolean approved) {
-        Optional<Booking> bookingById = bookingRepository.findById(bookingId);
-
-        if (bookingById.isEmpty()) {
-            log.debug("Бронь с id {} не найдена.", bookingId);
-            throw new NotFoundException(String.format("Бронь с id %s не найдена.", bookingId));
-        }
-        Booking booking = bookingById.get();
-
-        if (!booking.getItem().getOwner().getId().equals(userId)) {
-            log.debug("Пользователь не является владельцем вещи");
-            throw new NotFoundException(String.format("Пользователь с id %s не является владельцем", userId));
-        }
-        if (!booking.getStatus().equals(BookingStatus.WAITING)) {
-            throw new ValidationException(String.format("Бронь c id %s уже изменил статус",
-                    booking.getId()));
-        }
+        Booking booking = validateBookingDetails(userId, bookingId, 1);
+        assert booking != null;
         if (approved) {
             booking.setStatus(BookingStatus.APPROVED);
         } else {
@@ -74,29 +61,18 @@ public class BookingServiceImpl implements BookingService {
         return BookingMapper.toBookingOut(bookingRepository.save(booking));
     }
 
-
     @Override
     @Transactional(readOnly = true)
     public BookingDtoOut getBookingById(Long userId, Long bookingId) {
-        Optional<Booking> bookingById = bookingRepository.findById(bookingId);
-
-        if (bookingById.isEmpty()) {
-            throw new NotFoundException(String.format("Бронь с id %s не найдена.", bookingId));
-        }
-
-        Booking booking = bookingById.get();
-
-        if (!booking.getBooker().getId().equals(userId)
-                && !booking.getItem().getOwner().getId().equals(userId)) {
-            log.debug("Пользователь не является ни владельцем, ни автором бронирования");
-            throw new NotFoundException(String.format("Пользователь с id %s не является владельцем или автором бронирования ", userId));
-        }
+        Booking booking = validateBookingDetails(userId, bookingId, 2);
+        assert booking != null;
         return BookingMapper.toBookingOut(booking);
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<BookingDtoOut> getAll(Long bookerId, String state) {
+        validState(state);
         userService.getUserById(bookerId);
         switch (BookingState.valueOf(state)) {
             case ALL:
@@ -135,6 +111,7 @@ public class BookingServiceImpl implements BookingService {
     @Override
     @Transactional(readOnly = true)
     public List<BookingDtoOut> getAllOwner(Long ownerId, String state) {
+        validState(state);
         userService.getUserById(ownerId);
         switch (BookingState.valueOf(state)) {
             case ALL:
@@ -200,4 +177,43 @@ public class BookingServiceImpl implements BookingService {
             );
         }
     }
+
+    private void validState(String bookingState) {
+        BookingState state = BookingState.from(bookingState);
+        if (Objects.isNull(state)) {
+            throw new IllegalArgumentException(String.format("Unknown state: %s", bookingState));
+        }
+    }
+
+    private Booking validateBookingDetails(Long userId, Long bookingId, Integer number) {
+        Optional<Booking> bookingById = bookingRepository.findById(bookingId);
+        if (bookingById.isEmpty()) {
+            log.error("Бронь с id {} не найдена.", bookingId);
+            throw new NotFoundException(String.format("Бронь с id %s не найдена.", bookingId));
+        }
+        Booking booking = bookingById.get();
+        switch (number) {
+            case 1:
+                if (!booking.getItem().getOwner().getId().equals(userId)) {
+                    log.warn("Пользователь не является владельцем вещи");
+                    throw new NotFoundException(String.format("Пользователь с id %s не является владельцем", userId));
+                }
+                if (!booking.getStatus().equals(BookingStatus.WAITING)) {
+                    log.warn("В брони уже изменили статус");
+                    throw new ValidationException(String.format("Бронь c id %s уже изменил статус",
+                            booking.getId()));
+
+                }
+                return booking;
+            case 2:
+                if (!booking.getBooker().getId().equals(userId)
+                        && !booking.getItem().getOwner().getId().equals(userId)) {
+                    log.warn("Пользователь не является ни владельцем, ни автором бронирования");
+                    throw new NotFoundException(String.format("Пользователь с id %s не является владельцем или автором бронирования ", userId));
+                }
+                return booking;
+        }
+        return null;
+    }
 }
+

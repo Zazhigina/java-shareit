@@ -5,12 +5,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingDtoOut;
-import ru.practicum.shareit.booking.model.BookingState;
 import ru.practicum.shareit.booking.service.BookingService;
 
 import javax.validation.Valid;
 import java.util.List;
-import java.util.Objects;
 
 @RestController
 @RequestMapping(path = "/bookings")
@@ -46,22 +44,14 @@ public class BookingController {
     @GetMapping
     public List<BookingDtoOut> getAll(@RequestHeader("X-Sharer-User-Id") Long userId,
                                       @RequestParam(value = "state", defaultValue = "ALL") String bookingState) {
-        BookingState state = BookingState.from(bookingState);
-        if (Objects.isNull(state)) {
-            throw new IllegalArgumentException(String.format("Unknown state: %s", bookingState));
-        }
-        log.info("GET запрос на получение списка всех бронирований текущего пользователя с id: {} и статусом {}", userId, state);
+        log.info("GET запрос на получение списка всех бронирований текущего пользователя с id: {} и статусом {}", userId, bookingState);
         return bookingService.getAll(userId, bookingState);
     }
 
     @GetMapping("/owner")
     public List<BookingDtoOut> getAllOwner(@RequestHeader("X-Sharer-User-Id") Long ownerId,
                                            @RequestParam(value = "state", defaultValue = "ALL") String bookingState) {
-        BookingState state = BookingState.from(bookingState);
-        if (Objects.isNull(state)) {
-            throw new IllegalArgumentException(String.format("Unknown state: %s", bookingState));
-        }
-        log.info("GET запрос на получение списка всех бронирований текущего владельца с id: {} и статусом {}", ownerId, state);
+        log.info("GET запрос на получение списка всех бронирований текущего владельца с id: {} и статусом {}", ownerId, bookingState);
         return bookingService.getAllOwner(ownerId, bookingState);
     }
 }

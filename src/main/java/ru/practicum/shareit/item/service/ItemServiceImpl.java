@@ -49,31 +49,25 @@ public class ItemServiceImpl implements ItemService {
     public ItemDto update(Long userId, Long itemId, ItemDto itemDto) {
         UserDto user = userService.getUserById(userId);
         Optional<Item> itemOptional = itemRepository.findById(itemId);
-        if (itemOptional.isPresent()) {
-            if (!itemOptional.get().getOwner().getId().equals(userId)) {
-                log.debug("Пользователь с id {} не является владельцем предмета под id {}", userId, itemId);
-                throw new NotFoundException(String.format("Пользователь с id %s " +
-                        "не является владельцем предмета id %s.", userId, itemId));
-            }
-            Item itemFromStorage = itemOptional.get();
-            Item item = ItemMapper.toItem(itemDto);
-            if (Objects.isNull(item.getAvailable())) {
-                item.setAvailable(itemFromStorage.getAvailable());
-            }
-            if (Objects.isNull(item.getDescription())) {
-                item.setDescription(itemFromStorage.getDescription());
-            }
-            if (Objects.isNull(item.getName())) {
-                item.setName(itemFromStorage.getName());
-            }
-            item.setId(itemFromStorage.getId());
-            item.setRequest(itemFromStorage.getRequest());
-            item.setOwner(itemFromStorage.getOwner());
-
-            return ItemMapper.toItemDto(itemRepository.save(item));
+        Item itemFromStorage = itemOptional.orElseThrow(() -> new NotFoundException(String.format("Пользователь с id %s " +
+                "не является владельцем предмета id %s.", userId, itemId)));
+        Item item = ItemMapper.toItem(itemDto);
+        if (Objects.isNull(item.getAvailable())) {
+            item.setAvailable(itemFromStorage.getAvailable());
         }
-        return null;
+        if (Objects.isNull(item.getDescription())) {
+            item.setDescription(itemFromStorage.getDescription());
+        }
+        if (Objects.isNull(item.getName())) {
+            item.setName(itemFromStorage.getName());
+        }
+        item.setId(itemFromStorage.getId());
+        item.setRequest(itemFromStorage.getRequest());
+        item.setOwner(itemFromStorage.getOwner());
+
+        return ItemMapper.toItemDto(itemRepository.save(item));
     }
+
 
     @Override
     @Transactional(readOnly = true)
@@ -81,7 +75,7 @@ public class ItemServiceImpl implements ItemService {
         userService.getUserById(userId);
         Optional<Item> itemGet = itemRepository.findById(itemId);
         if (itemGet.isEmpty()) {
-            log.debug("У пользователя с id {} не существует предмета с id {}", userId, itemId);
+            log.warn("У пользователя с id {} не существует предмета с id {}", userId, itemId);
             throw new ru.practicum.shareit.exceptions.NotFoundException(String.format("У пользователя с id %s не " +
                     "существует предмета с id %s", userId, itemId));
         }
@@ -92,10 +86,7 @@ public class ItemServiceImpl implements ItemService {
         if (!item.getOwner().getId().equals(userId)) {
             return itemDto;
         }
-
-        getLastBooking(itemDto);
-        getNextBooking(itemDto);
-
+        getLastNextBooking(itemDto);
         return itemDto;
     }
 
@@ -109,8 +100,7 @@ public class ItemServiceImpl implements ItemService {
                 .collect(Collectors.toList());
 
         items.forEach(i -> {
-            getLastBooking(i);
-            getNextBooking(i);
+            getLastNextBooking(i);
             i.setComments(getAllComments(i.getId()));
         });
 
@@ -148,7 +138,7 @@ public class ItemServiceImpl implements ItemService {
         Optional<Item> itemById = itemRepository.findById(itemId);
 
         if (itemById.isEmpty()) {
-            log.debug("Пользователь с id {} нет предмета с id {}.", userId, itemId);
+            log.warn("Пользователь с id {} нет предмета с id {}.", userId, itemId);
             throw new NotFoundException(String.format("Пользователь с id: %s " +
                     "нет предмета с id: %s.", userId, itemId));
         }
@@ -157,7 +147,7 @@ public class ItemServiceImpl implements ItemService {
         List<Booking> userBookings = bookingRepository.findAllByUserBookings(userId, itemId, LocalDateTime.now());
 
         if (userBookings.isEmpty()) {
-            log.debug("Пользователь с id {} должен иметь хотя бы одно бронирование предмета с id {}.", userId, itemId);
+            log.warn("Пользователь с id {} должен иметь хотя бы одно бронирование предмета с id {}.", userId, itemId);
             throw new ValidationException(String.format("Пользователь с id %s должно быть хотя бы одно бронирование " +
                     "предмета с id %s.", userId, itemId));
         }
@@ -165,22 +155,14 @@ public class ItemServiceImpl implements ItemService {
         return CommentMapper.toCommentDto(commentRepository.save(CommentMapper.toComment(commentDto, item, user)));
     }
 
-    private void getLastBooking(ItemDto itemDto) {
+    private void getLastNextBooking(ItemDto itemDto) {
         Optional<Booking> lastBooking = bookingRepository.getLastBooking(itemDto.getId(), LocalDateTime.now());
-        if (lastBooking.isPresent()) {
-            itemDto.setLastBooking(BookingMapper.toBookingItemDto(lastBooking.get()));
-        } else {
-            itemDto.setLastBooking(null);
-        }
-    }
-
-    private void getNextBooking(ItemDto itemDto) {
+        itemDto.setNextBooking(
+                lastBooking.map(BookingMapper::toBookingItemDto).orElse(null)
+        );
         Optional<Booking> nextBooking = bookingRepository.getNextBooking(itemDto.getId(), LocalDateTime.now());
-        if (nextBooking.isPresent()) {
-            itemDto.setNextBooking(BookingMapper.toBookingItemDto(nextBooking.get()));
-        } else {
-            itemDto.setNextBooking(null);
-        }
-
+        itemDto.setNextBooking(
+                nextBooking.map(BookingMapper::toBookingItemDto).orElse(null)
+        );
     }
 }
