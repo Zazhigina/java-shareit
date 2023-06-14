@@ -157,7 +157,7 @@ public class ItemServiceImpl implements ItemService {
 
     private void getLastNextBooking(ItemDto itemDto) {
         Optional<Booking> lastBooking = bookingRepository.getLastBooking(itemDto.getId(), LocalDateTime.now());
-        itemDto.setNextBooking(
+        itemDto.setLastBooking(
                 lastBooking.map(BookingMapper::toBookingItemDto).orElse(null)
         );
         Optional<Booking> nextBooking = bookingRepository.getNextBooking(itemDto.getId(), LocalDateTime.now());
