@@ -5,20 +5,22 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
+import ru.practicum.shareit.booking.model.BookingStatus;
+import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.user.model.User;
 
 import javax.validation.constraints.Future;
 import javax.validation.constraints.FutureOrPresent;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
-@Builder
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-
-public class BookingDto {
-    @NotNull
-    private Long itemId;
+@Builder
+public class BookingDtoOut {
+    private Long id;
+    private Item item;
     @NotNull
     @FutureOrPresent
     @DateTimeFormat(pattern = "yyyy-MM-ddTHH:mm:ss")
@@ -27,5 +29,7 @@ public class BookingDto {
     @Future
     @DateTimeFormat(pattern = "yyyy-MM-ddTHH:mm:ss")
     private LocalDateTime end;
-
+    private User booker;
+    private BookingStatus status;
 }
+

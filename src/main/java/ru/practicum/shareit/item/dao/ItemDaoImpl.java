@@ -3,6 +3,7 @@ package ru.practicum.shareit.item.dao;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.item.model.Item;
 
 import java.util.*;
@@ -43,6 +44,7 @@ public class ItemDaoImpl implements ItemDao {
 
 
     @Override
+    @Transactional(readOnly = true)
     public Optional<Item> getItemById(Long itemId) {
         for (List<Item> itemList : items.values()) {
             for (Item item : itemList) {
@@ -60,6 +62,7 @@ public class ItemDaoImpl implements ItemDao {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<Item> search(String text) {
         List<Item> itemListSearch = new ArrayList<>();
         for (List<Item> itemList : items.values()) {

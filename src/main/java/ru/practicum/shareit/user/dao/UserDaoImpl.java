@@ -6,7 +6,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.concurrent.atomic.AtomicLong;
 
-import ru.practicum.shareit.user.User;
+import ru.practicum.shareit.user.model.User;
 
 import java.util.ArrayList;
 import java.util.HashMap;
