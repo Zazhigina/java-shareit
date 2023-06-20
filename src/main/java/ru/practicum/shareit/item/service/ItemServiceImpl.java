@@ -2,6 +2,8 @@ package ru.practicum.shareit.item.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.BookingMapper;
@@ -49,8 +51,18 @@ public class ItemServiceImpl implements ItemService {
     public ItemDto update(Long userId, Long itemId, ItemDto itemDto) {
         UserDto user = userService.getUserById(userId);
         Optional<Item> itemOptional = itemRepository.findById(itemId);
-        Item itemFromStorage = itemOptional.orElseThrow(() -> new NotFoundException(String.format("Пользователь с id %s " +
-                "не является владельцем предмета id %s.", userId, itemId)));
+
+        if (itemOptional.isEmpty()) {
+            throw new NotFoundException(
+                    String.format("Предмет с id %s не найтен.", itemId));
+        }
+        Item itemFromStorage = itemOptional.get();
+
+        if (!itemFromStorage.getOwner().getId().equals(userId)) {
+            log.debug("User with id {} is not owner of item with id {}.", userId, itemId);
+            throw new NotFoundException(String.format("Пользователь с id %s " +
+                    "не является владельцем предмета id %s.", userId, itemId));
+        }
         Item item = ItemMapper.toItem(itemDto);
         if (Objects.isNull(item.getAvailable())) {
             item.setAvailable(itemFromStorage.getAvailable());
@@ -62,7 +74,7 @@ public class ItemServiceImpl implements ItemService {
             item.setName(itemFromStorage.getName());
         }
         item.setId(itemFromStorage.getId());
-        item.setRequest(itemFromStorage.getRequest());
+        item.setRequestId(itemFromStorage.getRequestId());
         item.setOwner(itemFromStorage.getOwner());
 
         return ItemMapper.toItemDto(itemRepository.save(item));
@@ -92,13 +104,12 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<ItemDto> getAll(Long userId) {
+    public List<ItemDto> getAll(Long userId, Integer from, Integer size) {
         userService.getUserById(userId);
+        Pageable pageable = PageRequest.of(from / size, size);
 
-        List<ItemDto> items = itemRepository.findAllByOwnerIdOrderByIdAsc(userId).stream()
-                .map(ItemMapper::toItemDto)
-                .collect(Collectors.toList());
-
+        List<Item> itemList = itemRepository.findAllByOwnerIdOrderByIdAsc(userId, pageable).stream().collect(Collectors.toList());
+        List<ItemDto> items = ItemMapper.mapToItemDto(itemList);
         items.forEach(i -> {
             getLastNextBooking(i);
             i.setComments(getAllComments(i.getId()));
@@ -118,12 +129,13 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<ItemDto> search(Long userId, String text) {
+    public List<ItemDto> search(Long userId, String text, Integer from, Integer size) {
         userService.getUserById(userId);
+        Pageable pageable = PageRequest.of(from / size, size);
         if (text.isBlank()) {
             return Collections.emptyList();
         }
-        return ItemMapper.mapToItemDto(itemRepository.findAll().stream()
+        return ItemMapper.mapToItemDto(itemRepository.findAll(pageable).stream()
                 .filter(Item::getAvailable)
                 .filter(item -> item.getName().toLowerCase().contains(text.toLowerCase())
                         || item.getDescription().toLowerCase().contains(text.toLowerCase()))

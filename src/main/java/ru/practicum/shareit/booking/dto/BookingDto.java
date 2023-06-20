@@ -20,11 +20,9 @@ public class BookingDto {
     @NotNull
     private Long itemId;
     @NotNull
-    @FutureOrPresent
     @DateTimeFormat(pattern = "yyyy-MM-ddTHH:mm:ss")
     private LocalDateTime start;
     @NotNull
-    @Future
     @DateTimeFormat(pattern = "yyyy-MM-ddTHH:mm:ss")
     private LocalDateTime end;
 

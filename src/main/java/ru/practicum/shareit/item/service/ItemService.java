@@ -14,9 +14,9 @@ public interface ItemService {
 
     ItemDto getItemById(Long userId, Long itemId) throws ObjectNotFoundException;
 
-    List<ItemDto> getAll(Long userId);
+    List<ItemDto> getAll(Long userId, Integer  from, Integer size);
 
-    List<ItemDto> search(Long userId, String text);
+    List<ItemDto> search(Long userId, String text, Integer  from, Integer size);
 
     CommentDto createComment(Long userId, CommentDto commentDto, Long itemId);
 }
