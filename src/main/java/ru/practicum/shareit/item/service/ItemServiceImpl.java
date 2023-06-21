@@ -52,10 +52,7 @@ public class ItemServiceImpl implements ItemService {
         UserDto user = userService.getUserById(userId);
         Optional<Item> itemOptional = itemRepository.findById(itemId);
 
-        if (itemOptional.isEmpty()) {
-            throw new NotFoundException(
-                    String.format("Предмет с id %s не найтен.", itemId));
-        }
+        itemOptional.orElseThrow(() -> new NotFoundException(String.format("Предмет с id %s не найтен.", itemId)));
         Item itemFromStorage = itemOptional.get();
 
         if (!itemFromStorage.getOwner().getId().equals(userId)) {

@@ -39,10 +39,8 @@ public class BookingServiceImpl implements BookingService {
     public BookingDtoOut add(Long userId, BookingDto bookingDto) {
         User user = UserMapper.toUser(userService.getUserById(userId));
         Optional<Item> itemById = itemRepository.findById(bookingDto.getItemId());
-        if (itemById.isEmpty()) {
-            log.error("Вещь с id {} не найдена.", bookingDto.getItemId());
-            throw new NotFoundException(String.format("Вещь с id %s не найдена.", bookingDto.getItemId()));
-        }
+        itemById.orElseThrow(() -> new NotFoundException(String.format("Вещь с id %s не найдена.", bookingDto.getItemId())));
+        log.error("Вещь с id {} не найдена.", bookingDto.getItemId());
         Item item = itemById.get();
         bookingValidation(bookingDto, user, item);
         Booking booking = BookingMapper.toBooking(user, item, bookingDto);
@@ -182,10 +180,9 @@ public class BookingServiceImpl implements BookingService {
 
     private Booking validateBookingDetails(Long userId, Long bookingId, Integer number) {
         Optional<Booking> bookingById = bookingRepository.findById(bookingId);
-        if (bookingById.isEmpty()) {
-            log.error("Бронь с id {} не найдена.", bookingId);
-            throw new NotFoundException(String.format("Бронь с id %s не найдена.", bookingId));
-        }
+        bookingById.orElseThrow(() -> new NotFoundException(String.format("Бронь с id %s не найдена.", bookingId)));
+        log.error("Бронь с id {} не найдена.", bookingId);
+
         Booking booking = bookingById.get();
         switch (number) {
             case 1:
