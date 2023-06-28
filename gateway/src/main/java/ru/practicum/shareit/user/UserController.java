@@ -12,7 +12,7 @@ import javax.validation.Valid;
 @RequiredArgsConstructor
 @RequestMapping(path = "/users")
 @Slf4j
-public class UserController  {
+public class UserController {
     private final UserClient userClient;
 
     @PostMapping
@@ -40,7 +40,7 @@ public class UserController  {
     }
 
     @DeleteMapping("/{userId}")
-    public ResponseEntity<Object> delete (@PathVariable long userId) {
+    public ResponseEntity<Object> delete(@PathVariable long userId) {
         log.info("DELETE запрос на удаление пользователя с id: {}", userId);
         return userClient.deleteById(userId);
     }
