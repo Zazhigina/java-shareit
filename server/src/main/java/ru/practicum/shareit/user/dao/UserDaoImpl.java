@@ -15,7 +15,6 @@ import java.util.concurrent.atomic.AtomicLong;
 @Repository
 @RequiredArgsConstructor
 public class UserDaoImpl implements UserDao {
-
     private final Map<Long, User> users = new HashMap<>();
     private final AtomicLong userId = new AtomicLong();
 

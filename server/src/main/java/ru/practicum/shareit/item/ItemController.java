@@ -56,7 +56,7 @@ public class ItemController {
                                      @RequestParam(value = "from", defaultValue = "0") @Min(0) Integer from,
                                      @RequestParam(value = "size", defaultValue = "10") @Min(1) Integer size) {
         log.info("GET запрос на поиск всех вещей c текстом: {}", text);
-        return itemService.search(userId, text,  from, size);
+        return itemService.search(userId, text, from, size);
     }
 
     @PostMapping("/{itemId}/comment")
