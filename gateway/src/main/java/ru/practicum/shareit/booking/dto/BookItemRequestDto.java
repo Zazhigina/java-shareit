@@ -9,7 +9,6 @@ import javax.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.format.annotation.DateTimeFormat;
 
 @Getter
 @NoArgsConstructor
@@ -20,7 +19,6 @@ public class BookItemRequestDto {
     @NotNull
     private LocalDateTime start;
     @NotNull
-    @DateTimeFormat(pattern = "yyyy-MM-ddTHH:mm:ss")
     @Future
     private LocalDateTime end;
 }
