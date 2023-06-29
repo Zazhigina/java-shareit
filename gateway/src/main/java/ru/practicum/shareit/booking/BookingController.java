@@ -14,6 +14,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
+import java.util.Optional;
 
 @Controller
 @RequestMapping(path = "/bookings")
@@ -29,7 +30,7 @@ public class BookingController {
                                               @RequestParam(name = "state", defaultValue = "all") String stateParam,
                                               @PositiveOrZero @RequestParam(name = "from", defaultValue = "0") Integer from,
                                               @Positive @RequestParam(name = "size", defaultValue = "10") Integer size) {
-        BookingState state = Enum.valueOf(BookingState.class, stateParam);
+        BookingState state = Optional.of(Enum.valueOf(BookingState.class, stateParam)).orElseThrow();
         log.info("Get booking with state {}, userId={}, from={}, size={}", stateParam, userId, from, size);
         return bookingClient.getBookings(userId, state, from, size);
     }
@@ -53,7 +54,7 @@ public class BookingController {
                                               @RequestParam(value = "state", defaultValue = "ALL") String stateParam,
                                               @RequestParam(value = "from", defaultValue = "0") @Min(0) Integer from,
                                               @RequestParam(value = "size", defaultValue = "10") @Min(1) Integer size) {
-        BookingState state = Enum.valueOf(BookingState.class, stateParam);
+        BookingState state = Optional.of(Enum.valueOf(BookingState.class, stateParam)).orElseThrow();
         log.info("GET запрос на получение списка всех бронирований c state {}, userId={}, from={}, size={}", stateParam, ownerId, from, size);
         return bookingClient.getAllOwner(ownerId, state, from, size);
     }
