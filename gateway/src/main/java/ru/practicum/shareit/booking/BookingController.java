@@ -23,6 +23,7 @@ import javax.validation.constraints.PositiveOrZero;
 public class BookingController {
     private final BookingClient bookingClient;
     private static final String REQUEST_HEADER_SHARER_USER_ID = "X-Sharer-User-Id";
+
     @GetMapping
     public ResponseEntity<Object> getBookings(@RequestHeader(REQUEST_HEADER_SHARER_USER_ID) long userId,
                                               @RequestParam(name = "state", defaultValue = "all") String stateParam,
