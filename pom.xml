@@ -26,6 +26,7 @@
         <module>gateway</module>
         <module>server</module>
     </modules>
+
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
